@@ -1,0 +1,277 @@
+window.onload = function() { 
+
+ 2
+	var renderer, 
+
+ 3
+		scene, 
+
+ 4
+		camera, 
+
+ 5
+		cameraRadius = 200, 
+
+ 6
+		cameraTarget, 
+
+ 7
+		particleSystem, 
+
+ 8
+		particleSystemHeight = 100, 
+
+ 9
+		clock; 
+
+ 10
+
+ 
+
+ 11
+	init(); 
+
+ 12
+	animate(); 
+
+ 13
+
+ 
+
+ 14
+
+ 
+
+ 15
+	function init() { 
+
+ 16
+
+ 
+
+ 17
+		renderer = new THREE.WebGLRenderer(); 
+
+ 18
+
+ 
+
+ 19
+		renderer.setSize( window.innerWidth, window.innerHeight ); 
+
+ 20
+		renderer.setClearColor( new THREE.Color( 0x000000 ) ); 
+
+ 21
+
+ 
+
+ 22
+		scene = new THREE.Scene(); 
+
+ 23
+
+ 
+
+ 24
+		camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 ); 
+
+ 25
+		cameraTarget = new THREE.Vector3( 0, 0, 0 ); 
+
+ 26
+		 
+
+ 27
+		var numParticles = 100, 
+
+ 28
+			width = 100, 
+
+ 29
+			height = particleSystemHeight, 
+
+ 30
+			depth = 100, 
+
+ 31
+			systemGeometry = new THREE.Geometry(), 
+
+ 32
+			systemMaterial = new THREE.ParticleBasicMaterial({ color: 0xFFFFFF }); 
+
+ 33
+			 
+
+ 34
+		for( var i = 0; i < numParticles; i++ ) { 
+
+ 35
+			var vertex = new THREE.Vector3( 
+
+ 36
+					rand( width ), 
+
+ 37
+					Math.random() * height, 
+
+ 38
+					rand( depth ) 
+
+ 39
+				); 
+
+ 40
+
+ 
+
+ 41
+			systemGeometry.vertices.push( vertex ); 
+
+ 42
+		} 
+
+ 43
+
+ 
+
+ 44
+
+ 
+
+ 45
+		particleSystem = new THREE.ParticleSystem( systemGeometry, systemMaterial ); 
+
+ 46
+		particleSystem.position.y = -height/2; 
+
+ 47
+
+ 
+
+ 48
+		scene.add( particleSystem ); 
+
+ 49
+
+ 
+
+ 50
+		clock = new THREE.Clock(); 
+
+ 51
+
+ 
+
+ 52
+		document.body.appendChild( renderer.domElement ); 
+
+ 53
+
+ 
+
+ 54
+	} 
+
+ 55
+
+ 
+
+ 56
+
+ 
+
+ 57
+	function rand( v ) { 
+
+ 58
+		return (v * (Math.random() - 0.5)); 
+
+ 59
+	} 
+
+ 60
+
+ 
+
+ 61
+	function updateParticleSystem( elapsed ) { 
+
+ 62
+
+ 
+
+ 63
+		var geometry = particleSystem.geometry, 
+
+ 64
+			vertices = geometry.vertices, 
+
+ 65
+			numVertices = vertices.length, 
+
+ 66
+			speedY = 10 * elapsed; 
+
+ 67
+
+ 
+
+ 68
+		for(var i = 0; i < numVertices; i++) { 
+
+ 69
+			var v = vertices[i]; 
+
+ 70
+
+ 
+
+ 71
+			if( v.y > 0 ) { 
+
+ 72
+				v.y -= speedY * Math.random(); 
+
+ 73
+			} else { 
+
+ 74
+				v.y = particleSystemHeight; 
+
+ 75
+			} 
+
+ 76
+		} 
+
+ 77
+
+ 
+
+ 78
+		geometry.verticesNeedUpdate = true; 
+
+ 79
+
+ 
+
+ 80
+	} 
+
+ 81
+
+ 
+
+ 82
+	function animate() { 
+		requestAnimationFrame( animate ); 
+		var delta = clock.getDelta(), 
+		t = clock.getElapsedTime() * 0.5; 
+		updateParticleSystem( delta ); 
+		camera.position.set( cameraRadius * Math.sin( t ), 0, cameraRadius * Math.cos( t ) ); 
+		camera.lookAt( cameraTarget ); 
+		renderer.clear(); 
+		renderer.render( scene, camera ); 
+	} 
+} 
